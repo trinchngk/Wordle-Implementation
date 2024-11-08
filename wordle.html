@@ -1,0 +1,234 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset = "utf-8"> 
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Wordle</title>
+    <style type="text/css">
+        *{
+            margin: 0;
+            font-family: "Montserrat", sans-serif;
+            box-sizing: border-box;
+        }
+        .invert-colors {
+            background-color: black;
+            color: white;
+        }
+        .invert-colors .box {
+            border-color: white;
+            background-color: black;
+        }
+        .invert-colors .button {
+            background-color: white;
+            color: green;
+            border-color: white;
+        }
+        .invert-colors .guess {
+            background-color: black;
+            color: white;
+        }
+        @keyframes fade {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .box { 
+            border: 2px solid;
+            height: 60px;
+            width: 60px;
+            margin: 4px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            transition: transform 0.3s ease;
+            animation: fade 2s ease-in;
+        }
+        .box:hover {
+            transform: scale(1.1);
+        }
+        .button {
+            display: block;
+            border: 1px solid green;
+            color: #fff;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            background: green;  
+            padding: 14px 20px;
+            font-size: 18px;
+            cursor: pointer;  
+            border-radius: 10px;
+        }
+        .button:hover {
+            transform: scale(1.05);
+        }
+        h1 {
+            transition: transform 0.3s ease
+        }
+        h1:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+    <body>
+        <div style=" min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <h1 id="title">Wordle</h1>
+            <div id="grid" style="width: 340px; padding: 1%">
+                <div id="guess1" style="display: flex; flex-direction: row; width: 100%;">
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                </div>            
+                <div id="guess2" style="display: flex; flex-direction: row;">
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                </div>            
+                <div id="guess3" style="display: flex; flex-direction: row;">
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                </div>            
+                <div id="guess4" style="display: flex; flex-direction: row;">
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                </div>            
+                <div id="guess5" style="display: flex; flex-direction: row;">
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                </div>
+                <div id="guess6" style="display: flex; flex-direction: row;">
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                </div>
+            </div>
+            <form>
+                <div style="padding-top: 25px;">
+                    <label style="font-size: 18px; padding-right: 10px;"> Enter Your Guess:</label>
+                    <input id="guess" type="text" size="10" style="font-size: 18px; border-radius: 5px; border: solid green;">                    
+                </div>
+                <br>
+                <br>
+                <div style="display: flex; justify-content: center;">
+                    <input type="button" value="Guess" id="guess-button" class="button">
+                    <input style="display: none;" type="button" value="New Game" id="clear" class="button">                    
+                </div>
+            </form> 
+        </div>
+        <script>
+            let arrCount = 0;
+            let words = [];
+            let guessButton = document.getElementById("guess-button");
+            let clearButton = document.getElementById("clear");
+            let input = document.getElementById("guess");
+
+            let gameState = {
+                word: "",
+                wordSplit: []
+            };
+
+
+
+            input.addEventListener('keypress', function(event) {
+                if (event.key == 'Enter' && input.value.length == 5) {
+                    event.preventDefault();
+                    guessButton.click();
+                }
+            });
+
+            document.getElementById("title").onclick = () => {
+                if (!document.body.classList.contains("invert-colors")) {
+                    document.body.classList.add("invert-colors");                    
+                } else if (document.body.classList.contains("invert-colors")) {
+                    document.body.classList.remove("invert-colors");                    
+                }
+            };
+
+            document.getElementById("clear").onclick = () => {
+                arrCount++;
+                gameState.word = words[arrCount].toUpperCase();
+                console.log(gameState.word);
+                gameState.wordSplit = gameState.word.split("");
+
+                guessButton.style.display = "block";
+                clearButton.style.display = "none";
+                currRow = 0;
+
+                let grid = document.getElementById("grid").children;
+                for (let i = 0; i < grid.length; i++) {
+                    for (let j = 0; j < grid[i].children.length; j++) {
+                        grid[i].children[j].textContent = "";
+                        grid[i].children[j].style.backgroundColor = "";
+                    }
+                }
+            };
+
+            let res = fetch("https://random-word-api.vercel.app/api?words=30&length=5")
+                .then(response => response.json())
+                .then(data => { 
+                    words = data;
+                    gameState.word = words[arrCount].toUpperCase();
+                    console.log(gameState.word);
+                    gameState.wordSplit = gameState.word.split("");
+
+                    let currRow = 0;
+
+                    guessButton.onclick = () => {
+                        let guess = input.value.toUpperCase();
+                        let guessArr = guess.split("");
+
+                        let row = document.getElementById(`guess${currRow + 1}`).getElementsByClassName("box");
+
+                        if (guessArr.length != 5) {
+                            alert("Input word " + guess + " must be 5 characters long.");
+                            return;
+                        }
+
+                        guessArr.forEach((letter, index) => {
+                            row[index].textContent = letter;
+
+                            if (letter == gameState.wordSplit[index]) {
+                                row[index].style.backgroundColor = "greenyellow";
+                            } else if (gameState.wordSplit.includes(letter)) {
+                                row[index].style.backgroundColor = "yellow";
+                            }
+                        });
+
+                        if (guess == gameState.word) {
+                            alert("You win!");
+                            currRow = 0;
+                            guessButton.style.display = "none";
+                            clearButton.style.display = "block";
+
+                        } else if (currRow == 5) {
+                            alert("You lose!, the word was " + gameState.word);
+                            currRow = 0;
+                            guessButton.style.display = "none";
+                            clearButton.style.display = "block";
+
+                        } else {
+                            currRow++;
+                        }
+                        input.value = "";
+                    };
+                })
+                .catch(error => { console.log(error); });
+        </script>  
+    </body>
+</html>
